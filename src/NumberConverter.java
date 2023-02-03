@@ -4,6 +4,8 @@ public class NumberConverter {
 
     String hex;
 
+    int decimal;
+
     public NumberConverter(int number, int base) {
         String numberAsString = Integer.toString(number);
         digits = new int[numberAsString.length()];
@@ -15,9 +17,16 @@ public class NumberConverter {
         this.base = base;
     }
 
-    public NumberConverter(String number){
-       hex = number;
+    public NumberConverter(String number, int b) {
+        hex = number;
+        base = b;
     }
+
+    public NumberConverter(int number, int base, int something) {
+        decimal = number;
+        this.base = base;
+    }
+
     public String displayOriginalNumber() {
         String o = "";
         for (int i = 0; i < digits.length; i++) {
@@ -25,6 +34,10 @@ public class NumberConverter {
         }
         o = o + "\n";
         return o;
+    }
+
+    public int getBase() {
+        return base;
     }
 
     public int getNumber() {
@@ -40,6 +53,50 @@ public class NumberConverter {
 
     public int[] getDigits() {
         return digits;
+    }
+
+    public int hexToInt(String s) {
+        int curr = 0;
+
+
+        if (s.equals("A")) {
+            curr = 10;
+        } else if (s.equals("B")) {
+            curr = 11;
+        } else if (s.equals("C")) {
+            curr = 12;
+        } else if (s.equals("D")) {
+            curr = 13;
+        } else if (s.equals("E")) {
+            curr = 14;
+        } else if (s.equals("F")) {
+            curr = 15;
+        } else {
+            curr = Integer.parseInt(s);
+        }
+
+
+        return curr;
+    }
+
+    public String intToHex(String s) {
+        String re = "";
+        if (s.equals("10") || s.equals("10.0")) {
+            re = "A";
+        } else if (s.equals("11") || s.equals("11.0")) {
+            re = "B";
+        } else if (s.equals("12") || s.equals("12.0")) {
+            re = "C";
+        } else if (s.equals("13") || s.equals("13.0")) {
+            re = "D";
+        } else if (s.equals("14") || s.equals("14.0")) {
+            re = "E";
+        } else if (s.equals("15") || s.equals("15.0")) {
+            re = "F";
+        } else {
+            re = s;
+        }
+        return re;
     }
 
     public String hexToBinary() {
@@ -63,32 +120,57 @@ public class NumberConverter {
                 curr = Integer.parseInt(hex.substring(i, i + 1));
             }
 
-                for (int j = curr; j != 0; j = j / 2) {
-                    if (j % 2 == 0) {
-                        binary += "0";
-                    } else {
-                        binary += "1";
-                    }
+            for (int j = curr; j != 0; j = j / 2) {
+                if (j % 2 == 0) {
+                    binary += "0";
+                } else {
+                    binary += "1";
+                }
             }
-                if(i!=0){
-                if(binary.length() ==1){
-                    binary+="000";
+            if (i != 0) {
+                if (binary.length() == 1) {
+                    binary += "000";
                 }
-                if(binary.length() ==2){
-                    binary+="00" ;
+                if (binary.length() == 2) {
+                    binary += "00";
                 }
-                if(binary.length() ==3){
-                    binary+="0";
+                if (binary.length() == 3) {
+                    binary += "0";
                 }
-                }
+            }
 
             for (int k = binary.length() - 1; k != -1; k--) {
                 reversed += binary.substring(k, k + 1);
             }
-              binary = "";
+            binary = "";
         }
 
         return reversed;
+    }
+
+    public String convertToAnyBase(int s) {
+        String conversion = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/";
+        return conversion.substring(s, s + 1);
+    }
+
+    public String convertToBase() {
+        String h = "";
+        String result = "";
+        double remainder = 0;
+        String single = "";
+        int remainderAsInt = 0;
+        String reverse = "";
+        for (int i = getNumber(); i != 0; i /= base) {
+            remainder = i % base;
+            remainderAsInt = (int) remainder;
+            single = convertToAnyBase(remainderAsInt);
+            result += single;
+        }
+        for (int i = result.length() - 1; i != -1; i--) {
+            reverse += result.substring(i, i + 1);
+        }
+        result = reverse;
+        return result;
     }
 
     public int[] convertToDecimal() {
@@ -102,10 +184,16 @@ public class NumberConverter {
                 }
                 count++;
             }
-        } else {
+        } else if (base == 8) {
             for (int i = digits.length - 1; i >= 0; i--) {
                 result += Math.pow(8, count) * digits[i];
                 count++;
+            }
+        } else if (base == 16) {
+            int c = 0;
+            for (int i = hex.length() - 1; i >= 0; i--) {
+                result += hexToInt(hex.substring(c, c + 1)) * Math.pow(16, i);
+                c++;
             }
         }
         newList[0] = result;
@@ -163,11 +251,14 @@ public class NumberConverter {
                 }
 
             }
-            if(octal.indexOf("1")!=0){
-               octal = octal.substring(octal.indexOf("1"));
+            if (octal.indexOf("1") != 0) {
+                octal = octal.substring(octal.indexOf("1"));
             }
             result[0] = Integer.parseInt(octal);
-        } else if(base == 16){
+        } else if (base == 16 ) {
+            int b = Integer.parseInt(hexToBinary());
+            result[0] = b;
+
 
         }
 
@@ -202,11 +293,27 @@ public class NumberConverter {
                 sum = 0;
             }
             result[0] = Integer.parseInt(r);
+        } else if (base == 16) {
+            int sum = 0;
+            int c = 0;
+            for (int n = hex.length() - 1; n >= 0; n--) {
+                sum += hexToInt(hex.substring(c, c + 1)) * Math.pow(16, n);
+                c++;
+            }
+            String remain = "";
+            for (int i = sum; i != 0; i /= 8) {
+                remain += i % 8;
+            }
+            String re = "";
+            for (int n = remain.length() - 1; n != -1; n--) {
+                re += remain.substring(n, n + 1);
+            }
+
+            result[0] = Integer.parseInt(re);
         }
 
         return result;
     }
-
 
 
     public boolean checkValue(String s) {
@@ -222,39 +329,123 @@ public class NumberConverter {
             }
 
             if (s.contains("8") || s.contains("9")) return false;
-        }
-        else if(s.substring(0,1).equals("0")){
+        } else if (s.substring(0, 1).equals("0")) {
             return false;
-        } else{
-            return true;
-        }
-        return true;
-    }
-    public boolean checkBase(String b){
-        if(!b.equals("2") && !b.equals("8") && !b.equals(("10"))){
-            return false;
-        }
-        return true;
-    }
-    public void convert(){
+        } else if(base == 16){
+            String hexList = "123456789ABCDEF";
+            for(int k = 0 ; k<s.length()-1 ;k++){
+                if(!hexList.contains(s.substring(k,k+1))){
+                    return false;
+                }
+            }
+        } else{return true;}
 
-        if(base == 2){
-      System.out.println("Octal Number: " + convertToOctal()[0]);
-      System.out.println("Decimal Number: " + convertToDecimal()[0]);
-        } else if(base == 8){
+            return true;
+
+    }
+
+    public boolean checkBase(String b) {
+        if (!b.equals("2") && !b.equals("8") && !b.equals(("10")) && !b.equals("16")) {
+            return false;
+        }
+        return true;
+    }
+
+    public void convert() {
+
+        if (base == 2) {
+            System.out.println("Octal Number: " + convertToOctal()[0]);
+            System.out.println("Decimal Number: " + convertToDecimal()[0]);
+            System.out.println("Hexadecimal Number : " + convertToHex());
+        } else if (base == 8) {
             System.out.println("Binary Number: " + convertToBinary()[0]);
             System.out.println("Decimal Number: " + convertToDecimal()[0]);
-        } else{
+            System.out.println("Hexadecimal Number : " + convertToHex());
+        } else if (base == 10) {
             System.out.println("Binary Number: " + convertToBinary()[0]);
             System.out.println("Octal Number: " + convertToOctal()[0]);
+            System.out.println("Hexadecimal Number : " + convertToHex());
+        } else {
+            System.out.println("Binary Number: " + convertToBinary()[0]);
+            System.out.println("Octal Number: " + convertToOctal()[0]);
+            System.out.println("Decimal Number: " + convertToDecimal()[0]);
         }
     }
-        public int convertToHex(){
-        return 1;
+
+    public String convertToHex() {
+        String result = "";
+        if (base == 2) {
+            int decimal = 0;
+            int count = 0;
+            for (int i = digits.length - 1; i > -1; i--) {
+                if (digits[count] == 1) {
+                    decimal += Math.pow(2, i);
+                }
+                count++;
+            }
+            String h = "";
+
+            double remainder = 0;
+            String single = "";
+            int remainderAsInt = 0;
+            String reverse = "";
+            for (int i = decimal; i != 0; i /= 16) {
+                remainder = i % 16.0;
+                remainderAsInt = (int) remainder;
+                single = intToHex(Integer.toString(remainderAsInt));
+                result += single;
+            }
+            for (int i = result.length() - 1; i != -1; i--) {
+                reverse += result.substring(i, i + 1);
+            }
+            result = reverse;
+        } else if (base == 8) {
+            int decimal = 0;
+            int count = 0;
+            for (int i = digits.length - 1; i >= 0; i--) {
+                decimal += Math.pow(8, count) * digits[i];
+                count++;
+            }
+            String h = "";
+
+            double remainder = 0;
+            String single = "";
+            int remainderAsInt = 0;
+            String reverse = "";
+            for (int i = decimal; i != 0; i /= 16) {
+                remainder = i % 16.0;
+                remainderAsInt = (int) remainder;
+                single = intToHex(Integer.toString(remainderAsInt));
+                result += single;
+            }
+            for (int i = result.length() - 1; i != -1; i--) {
+                reverse += result.substring(i, i + 1);
+            }
+            result = reverse;
+        } else if (base == 10) {
+            String h = "";
+
+            double remainder = 0;
+            String single = "";
+            int remainderAsInt = 0;
+            String reverse = "";
+            for (int i = getNumber(); i != 0; i /= 16) {
+                remainder = i % 16.0;
+                remainderAsInt = (int) remainder;
+                single = intToHex(Integer.toString(remainderAsInt));
+                result += single;
+            }
+            for (int i = result.length() - 1; i != -1; i--) {
+                reverse += result.substring(i, i + 1);
+            }
+            result = reverse;
         }
-}
-
-
-
-
-
+        return result;
+    }
+    public boolean check64Base(int b){
+        if(b>64 || b<1){
+            return false;
+        }
+        return true;
+    }
+    }
