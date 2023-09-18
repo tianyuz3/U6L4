@@ -64,8 +64,8 @@ class ConverterRunner {
             }
             NumberConverter decimalNumber = new NumberConverter(decimal, base);
             System.out.println("Original Number: " + decimal);
-            System.out.println("Converted to Base : " + base);
-            System.out.println(decimal + " in base " + base + "is: " + decimalNumber.convertToBase());
+            System.out.println("Converted to Base " + base);
+            System.out.println(decimal + " in base " + base + " is: " + decimalNumber.convertToBase());
         }
 
     }
